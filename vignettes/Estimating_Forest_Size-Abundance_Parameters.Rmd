@@ -1,0 +1,278 @@
+---
+title: "Estimating Forest Size-Abundance Parameters"
+author: "Adam Eichenwald"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Estimating Forest Size-Abundance Parameters}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# # Introduction
+
+Understanding how trees are distributed by size within forests is fundamental to ecology, management, and conservation. Tree size distributions shape forest structure, carbon storage, biodiversity, and resilience. Across many forest types, smaller trees are far more numerous than larger trees, and mid-sized trees often follow a predictable **Pareto (power-law) distribution**, where abundance declines systematically with size.
+
+Remote sensing offers a powerful way to capture forest structure over broad areas. **LiDAR** provides detailed vertical information but is often limited in coverage, while high-resolution **RGB imagery** is more widely available but primarily captures canopy trees. Because many mid-sized and understory trees may be occluded, simply counting visible trees can underestimate true forest structure.
+
+The **ScalingFromSkypackage R package** leverages the known form of the size-abundance distribution to infer the obscured portion of the forest. By fitting a Pareto distribution to the observable portion of the data, the package interpolates the expected parameters for the **10–50 cm DBH range**, allowing estimation of both the **Pareto exponent (α)** and the **total number of trees (N_tot)**, including those potentially hidden from view.
+
+The workflow requires pre-processed tree-level data (DBH) and optionally site-specific covariates such as **leaf area index (LAI)**. It focuses on trees in the 10–50 cm DBH range, where the Pareto distribution generally holds, while smaller (<10 cm) and larger (>50 cm) trees naturally deviate from this pattern for ecological reasons, independent of remote sensing visibility.
+
+The workflow includes:
+
+1. Identifying the observable range of tree sizes that follow a power-law distribution.
+2. Estimating the Pareto exponent (α) for the 10–50 cm DBH range.
+3. Estimating the total number of trees (N_tot) for the area of interest, including those potentially occluded.
+
+This vignette demonstrates a complete workflow using sample data from the Harvard Forest ForestGEO project and NEON canopy height models.  Although in our example the dataset was derived from canopy height rasters and segmentation of tree crowns, the methods in this package work with vector data (tree-level attributes such as DBH and height). The package itself does not process raw rasters; instead, it assumes a pre-processed dataset of individual crowns or trees.
+
+## Load Packages and Data
+
+We begin by loading the necessary libraries, including `ScalingFromSkypackage`, and our sample dataset.
+
+```{r message=FALSE, warning=FALSE}
+library(sf)
+library(dplyr)
+library(ggplot2) # Added for plotting
+library(purrr)
+library(itcSegment)
+library(stringr)
+library(tibble)
+library(VGAM)
+library(data.table)
+library(rstan)
+library(posterior)
+library(ScalingFromSkypackage)
+
+# Load the sample data included with the package
+data("harv_data_sample")
+```
+
+## Step 1: Prepare Tree Data
+
+Here, we load our pre-processed tree data, ‘harv_data_sample,’ which contains attributes like `IDhectbest` (a unique ID for each hectare plot) and `dbh` (diameter at breast height) that were derived from raster data through segmentation and allometric conversions using the itcSegment package.
+
+```{r}
+# Filter for a specific plot for a single-site example and extract the distribution of individual tree diameters
+df_tile <- harv_data_sample %>%
+  filter(IDhectbest == 1, !is.na(dbh)) %>%
+  select(dbh)
+```
+
+## Step 2: Identify Breakpoint
+
+The size-abundance distribution of trees often follows a power-law, but for data from remote sensing part of this distribution is hidden due to smaller trees being overshadowed by larger trees in the canopy. We use a kernel density estimation (KDE) and bootstrapping approach to identify the potential breakpoint at which the observable data deviates from the predicted distribution; trees smaller than this breakpoint are estimated to be obscured by the canopy. The `get_potential_breakpoint_and_kde` function helps us to determine the point ($x_{min}$) where the data is no longer impacted by visibility bias and fully represents the power-law distribution.
+```{r}
+kde_output <- get_potential_breakpoint_and_kde(df_tile)
+```
+
+We can inspect the output to see the estimated breakpoint.
+
+```{r results='asis'}
+# The result of this function is a list containing the breakpoint and KDE data.
+# We'll print a summary of the key output.
+cat("### Estimated Breakpoint\n")
+# The breakpoint is estimated on the log10 scale, so we exponentiate (10^x) 
+# to convert back to the original DBH units (cm).
+cat(10^kde_output$potential_breakpoint, "cm")
+```
+
+## Step 3: Truncation and Filtering
+
+Based on the potential breakpoint, we refine the final breakpoint (in this case, at a DBH of approximately 26 cm) and define the upper truncation point of our dataset (generally 50 cm DBH, as trees over this size begin to deviate from the Pareto distribution). This means the data from the remote sensing image we use for our future interpolation step will only include trees with DBH between 26 cm and 50 cm, inclusive. This step is crucial for ensuring that the subsequent Bayesian model only fits the portion of the data that adheres to the power-law distribution, since the distribution we are using here generally does not predict size extremes well (e.g., DBH < 10cm or >50cm). If an alternative distribution is used, it might not be necessary to truncate the upper limit of the distribution.
+
+```{r}
+trunc_output <- determine_truncation_and_filter(kde_output)
+```
+
+## Step 4: Fit the Alpha Model
+
+Next, we fit a Bayesian Pareto model to estimate the power-law exponent, $\alpha$. This step accounts for leaf area index (LAI), a key correction factor for visibility bias in remote sensing data. The function also expects a prior for $\alpha$, including uncertainty in the prior. In our original paper (Eichenwald et al., 2025) we calculated this prior with a random forest model trained on FIA data. We input environmental data for a given site into the model and obtained a prediction for $\alpha$, including uncertainty. This prediction is blind to the actual remote sensing data itself, which is why it is used for the prior.
+
+```{r message=FALSE, warning=FALSE}
+fit <- fit_alpha_model(
+  bayesian_data = trunc_output$bayesian_data,
+  breakpoint = trunc_output$final_breakpoint,
+  LAI = 5.426,            # Example LAI value for the site
+  prior_mean = 1.4,
+  prior_sd = 0.3
+)
+```
+
+Let's create a plot showing the resulting fitted curve.
+
+```{r fig.height=4, fig.width=6, message=FALSE, warning=FALSE}
+# Create a data frame for plotting the fitted line
+plot_data <- tibble(
+  dbh = seq(10, 50, length.out = 100),
+  fit_n_dbh = dpareto(dbh, shape = fit$posterior_summary$mean, scale = 10)
+)
+
+# Plot the distribution and the fitted model
+ggplot(trunc_output$bayesian_data, aes(x = dbh)) +
+  geom_line(data = plot_data, aes(x = dbh, y = fit_n_dbh), color = "red", size = 1) +
+  # scale_x_continuous(trans = 'log10') +
+  # scale_y_continuous(trans = 'log10') +
+  labs(title = "Estimated Size-Abundance (Density) Distribution",
+       x = "Diameter at Breast Height (cm)",
+       y = "Tree Density") +
+  theme_bw()
+```
+
+## Step 5: Estimate Total Number of Trees
+
+Using the posterior samples of $\alpha$ from our fitted model, we estimate the total number of trees for the hectare plot. This gives us a final, corrected estimate of tree abundance for the site. The priors for the total number of trees (N_tot_prior_mean, N_tot_prior_sd) are set by default to 1250 and 625, respectively. These values come from estimates using TreeMap (Riley et al. 2021), a tree-level imputation of FIA plot data across the conterminous US. These defaults provide a reasonable prior for a typical 1 ha plot, but users may wish to adjust them to better reflect site-specific expectations.
+
+Note: This chunk may take longer to run than the code estimating $\alpha$.
+
+```{r}
+trees <- estimate_total_trees(
+  alpha_model_output = fit,
+  N_tot_prior_mean = 1250,
+  N_tot_prior_sd = 625
+)
+```
+
+Visualize the results, where the y-axis density from our previous graph is converted to tree abundance.
+
+```{r fig.height=4, fig.width=6, message=FALSE, warning=FALSE}
+# Create a data frame for plotting the fitted line
+plot_data <- tibble(
+  dbh = seq(10, 50, length.out = 100),
+  fit_n_dbh = dpareto(dbh, shape = fit$posterior_summary$mean, scale = 10)* trees$posterior_summary$mean
+)
+
+# Plot the distribution and the fitted model
+ggplot(trunc_output$bayesian_data, aes(x = dbh)) +
+  geom_line(data = plot_data, aes(x = dbh, y = fit_n_dbh), color = "red", size = 1) +
+  # scale_x_continuous(trans = 'log10') +
+  # scale_y_continuous(trans = 'log10') +
+  labs(title = "Estimated Size-Abundance Distribution",
+       x = "Diameter at Breast Height (cm)",
+       y = "Number of Trees") +
+  theme_bw()
+```
+## Step 6: Loop Over Sites
+
+The entire workflow can be applied across multiple spatial units (tiles, plots, or stands) by simply iterating through them. The following loop demonstrates how you would apply the functions to multiple plots. The `tryCatch` blocks are used for robust error handling, ensuring the loop can continue even if one of the plots fails to meet the model's requirements. The first loop will likely take longer than any succeeding loop, since the Stan code has to compile the first time you run it in a session. Once it has compiled, however, the run should be a little faster.
+
+
+```{r eval = FALSE}
+alpha_results <- list()
+tree_results <- list()
+for (i in unique(harv_data_sample$IDhectbest)) {
+  df_tile <- harv_data_sample %>% filter(IDhectbest == i, !is.na(dbh))
+  if (nrow(df_tile) < 25) next
+
+  kde_output <- tryCatch(get_potential_breakpoint_and_kde(df_tile), error = function(e) NULL)
+  if (is.null(kde_output)) next
+
+  trunc_output <- tryCatch(determine_truncation_and_filter(kde_output), error = function(e) NULL)
+  if (is.null(trunc_output)) next
+
+  fit <- tryCatch(fit_alpha_model(trunc_output$bayesian_data, trunc_output$final_breakpoint, LAI = 3.5, prior_mean = 1.4, prior_sd = 0.3), error = function(e) NULL)
+  if (is.null(fit)) next
+
+  trees <- tryCatch(estimate_total_trees(fit), error = function(e) NULL)
+  if (is.null(trees)) next
+
+  alpha_results[[paste0("HARV_", i)]] <- fit$posterior_summary
+  tree_results[[paste0("HARV_", i)]] <- trees$posterior_summary
+}
+```
+
+## Step 7: Example Workflow for Multiple Sites / Parallelization
+
+The following code demonstrates how a user could apply the workflow across multiple plots or raster cells. This is example code only (eval = FALSE), so it will not run when building the vignette.
+
+```{r eval = FALSE}
+# Simple for-loop approach
+alpha_results <- list()
+tree_results <- list()
+
+for (i in unique(harv_data_sample$IDhectbest)) {
+  df_tile <- harv_data_sample %>% filter(IDhectbest == i, !is.na(dbh))
+  if (nrow(df_tile) < 25) next
+
+  kde_output <- tryCatch(get_potential_breakpoint_and_kde(df_tile), error = function(e) NULL)
+  if (is.null(kde_output)) next
+
+  trunc_output <- tryCatch(determine_truncation_and_filter(kde_output), error = function(e) NULL)
+  if (is.null(trunc_output)) next
+
+  fit <- tryCatch(fit_alpha_model(
+                    trunc_output$bayesian_data,
+                    trunc_output$final_breakpoint,
+                    LAI = 3.5,
+                    prior_mean = 1.4,
+                    prior_sd = 0.3),
+                  error = function(e) NULL)
+  if (is.null(fit)) next
+
+  trees <- tryCatch(estimate_total_trees(fit), error = function(e) NULL)
+  if (is.null(trees)) next
+
+  alpha_results[[paste0("HARV_", i)]] <- fit$posterior_summary
+  tree_results[[paste0("HARV_", i)]] <- trees$posterior_summary
+}
+```
+
+If you have a lot of sites to run (like if you are developing a raster of size-abundance distribution for a large area and want to individually interpolate the distribution for each cell) then you should likely parallelize this code. Packages such as *foreach*, *doParallel*, or *parallel* could work for you here. There may also be a way to vectorize this approach, which might be faster than a *for loop* since it is more in line with how R is supposed to operate.
+
+```{r eval = FALSE}
+# Parallelized version using foreach + doParallel
+library(foreach)
+library(doParallel)
+
+# Detect number of cores
+n_cores <- parallel::detectCores() - 1
+cl <- makeCluster(n_cores)
+registerDoParallel(cl)
+
+alpha_results <- list()
+tree_results <- list()
+
+alpha_tree_results <- foreach(i = unique(harv_data_sample$IDhectbest), .packages = c("dplyr", "ScalingFromSkypackage")) %dopar% {
+  df_tile <- harv_data_sample %>% filter(IDhectbest == i, !is.na(dbh))
+  if (nrow(df_tile) < 25) return(NULL)
+
+  kde_output <- tryCatch(get_potential_breakpoint_and_kde(df_tile), error = function(e) NULL)
+  if (is.null(kde_output)) return(NULL)
+
+  trunc_output <- tryCatch(determine_truncation_and_filter(kde_output), error = function(e) NULL)
+  if (is.null(trunc_output)) return(NULL)
+
+  fit <- tryCatch(fit_alpha_model(
+                    trunc_output$bayesian_data,
+                    trunc_output$final_breakpoint,
+                    LAI = 3.5,
+                    prior_mean = 1.4,
+                    prior_sd = 0.3),
+                  error = function(e) NULL)
+  if (is.null(fit)) return(NULL)
+
+  trees <- tryCatch(estimate_total_trees(fit), error = function(e) NULL)
+  if (is.null(trees)) return(NULL)
+
+  list(alpha = fit$posterior_summary, trees = trees$posterior_summary)
+}
+
+# Optionally, combine results into named lists
+for (i in seq_along(alpha_tree_results)) {
+  if (!is.null(alpha_tree_results[[i]])) {
+    site_name <- paste0("HARV_", unique(harv_data_sample$IDhectbest)[i])
+    alpha_results[[site_name]] <- alpha_tree_results[[i]]$alpha
+    tree_results[[site_name]] <- alpha_tree_results[[i]]$trees
+  }
+}
+
+stopCluster(cl)
+```
