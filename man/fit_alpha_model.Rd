@@ -22,7 +22,10 @@ fit_alpha_model(
 
 \item{breakpoint}{The final lower log10 size threshold (from KDE peak).}
 
-\item{LAI}{A numeric value for site-level Leaf Area Index.REPORT SCALE HERE, MAKE SURE IT MAKES SENSE (0-1)}
+\item{LAI}{A numeric value for site-level Leaf Area Index. The function assumes your LAI value is on
+a 1-10 scale and will divide by 10 to get LAI between 0 and 1 (e.g., if you have an LAI of 5 on a scale of 1-10,
+enter 5, while if you have a 50 on a scale of 1-100, enter 5)
+the LAI to be between 0 and 1}
 
 \item{prior_mean}{Prior mean for the alpha parameter.}
 

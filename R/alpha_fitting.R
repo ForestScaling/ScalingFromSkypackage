@@ -21,7 +21,7 @@ parameters {
 transformed parameters {
   real adjustment_factor = 1 - sqrt(LAI_norm * breakpoint_norm);
 }
-model {
+
   alpha ~ normal(prior_mean, prior_sd) T[0, ];
   real p_trunc = pareto_cdf(trunc_upper | x_min, alpha) - pareto_cdf(trunc_point | x_min, alpha);
   for (n in 1:N) {
@@ -54,7 +54,7 @@ model {
 #'   \item{trim_max_value}{The `trim_max` value used in this function, passed along for consistency.}
 #' }
 #' @export
-get_potential_breakpoint_and_kde <- function(data,
+potential_break <- function(data,
                                              n_bootstrap = 1000,
                                              bandwidth = "SJ",
                                              trim_max = 50) {
@@ -144,19 +144,18 @@ get_potential_breakpoint_and_kde <- function(data,
 #' performs segmented regression, determines the upper truncation point,
 #' and filters the original dataset to the identified size range.
 #'
-#' @param breakpoint_kde_results A list returned by `get_potential_breakpoint_and_kde`.
+#' @param breakpoint_kde_results A list returned by `potential_break`.
 #'   It must contain `potential_breakpoint`, `bootstrap_kde_log`,
 #'   `original_raw_data_df`, and `trim_max_value`.
 #'
 #' @return A list with:
 #' \describe{
-#'   \item{breakpoint}{The final determined lower log10 size bound.}
-#'   \item{upper_bound}{The final determined upper log10 size bound (log10 scale).}
-#'   \item{filtered_data}{Subset of original data between 10^breakpoint and 10^upper_bound.}
-#'   \item{bootstrap_kde_log}{The full log-scaled KDE data from the first function.}
+#'   \item{final_breakpoint}{The final determined lower log10 size bound.}
+#'   \item{bayesian_data}{Subset of original data between 10^breakpoint and 10^upper_bound.}
+#'   \item{kerneldens_logtransform}{The full log-scaled KDE data from the first function.}
 #' }
 #' @export
-determine_truncation_and_filter <- function(breakpoint_kde_results, min_size = 10) {
+truncate_filter <- function(breakpoint_kde_results, min_size = 10) {
 
   # Extract necessary components from the input list
   potential_breakpoint <- breakpoint_kde_results$potential_breakpoint
@@ -166,7 +165,7 @@ determine_truncation_and_filter <- function(breakpoint_kde_results, min_size = 1
 
   # For robustness, let's ensure potential_breakpoint is not NA
   if (is.na(potential_breakpoint)) {
-    stop("Potential breakpoint is NA. Cannot proceed with segmented regression. Check 'get_potential_breakpoint_and_kde' output.")
+    stop("Potential breakpoint is NA. Cannot proceed with segmented regression. Check 'potential_break' output.")
   }
 
   # Filter the data for segmented regression *before* passing it to lm
@@ -229,10 +228,13 @@ determine_truncation_and_filter <- function(breakpoint_kde_results, min_size = 1
 #' this function will require rstan, which itself needs Rtools. Rtools is not a CRAN package and as far
 #' as we know must be installed directly. Try this link (https://cran.r-project.org/bin/windows/Rtools/)
 #'
-#' @param bayesian_data A data frame of filtered tree sizes (from `determine_truncation_and_filter()`).
+#' @param bayesian_data A data frame of filtered tree sizes (from `truncate_filter()`).
 #' @param bootstrap_kde_log A data frame of log10(size) and log10(kernel density), used for computing R2.
 #' @param breakpoint The final lower log10 size threshold (from KDE peak).
-#' @param LAI A numeric value for site-level Leaf Area Index.REPORT SCALE HERE, MAKE SURE IT MAKES SENSE (0-1)
+#' @param LAI A numeric value for site-level Leaf Area Index. The function assumes your LAI value is on
+#' a 1-10 scale and will divide by 10 to get LAI between 0 and 1 (e.g., if you have an LAI of 5 on a scale of 1-10,
+#' enter 5, while if you have a 50 on a scale of 1-100, enter 5)
+#' the LAI to be between 0 and 1
 #' @param prior_mean Prior mean for the alpha parameter.
 #' @param prior_sd Prior standard deviation for the alpha parameter.
 #' @param stan_model_code Character string of a Stan model (default = `stan_alpha_model`).
