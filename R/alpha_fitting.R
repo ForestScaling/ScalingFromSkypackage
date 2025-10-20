@@ -21,7 +21,7 @@ parameters {
 transformed parameters {
   real adjustment_factor = 1 - sqrt(LAI_norm * breakpoint_norm);
 }
-
+model {
   alpha ~ normal(prior_mean, prior_sd) T[0, ];
   real p_trunc = pareto_cdf(trunc_upper | x_min, alpha) - pareto_cdf(trunc_point | x_min, alpha);
   for (n in 1:N) {

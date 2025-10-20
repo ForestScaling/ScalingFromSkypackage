@@ -18,7 +18,7 @@ fit_alpha_model(
 )
 }
 \arguments{
-\item{bayesian_data}{A data frame of filtered tree sizes (from \code{determine_truncation_and_filter()}).}
+\item{bayesian_data}{A data frame of filtered tree sizes (from \code{truncate_filter()}).}
 
 \item{breakpoint}{The final lower log10 size threshold (from KDE peak).}
 

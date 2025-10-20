@@ -1,6 +1,6 @@
 Package: ScalingFromSkypackage
 Title: Estimate Forest Size-Abundance Distribution from Remote Sensing Image.
-Version: 0.0.0.9000
+Version: 1.0
 Authors@R: 
     person("Adam", "Eichenwald", , "adam.eichenwald@maine.edu", role = c("aut", "cre"))
 Description: Estimate forest size-abundance distribution from remote sensing image.
@@ -21,5 +21,6 @@ Imports:
     rstan,
     segmented,
     splus2R,
-    VGAM
+    VGAM,
+    ggplot2
 Config/testthat/edition: 3
