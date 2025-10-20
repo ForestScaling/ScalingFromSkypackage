@@ -1,11 +1,15 @@
 Package: ScalingFromSkypackage
 Title: Estimate Forest Size-Abundance Distribution from Remote Sensing Image.
 Version: 1.0
-Authors@R: 
-    person("Adam", "Eichenwald", , "adam.eichenwald@maine.edu", role = c("aut", "cre"))
+Authors@R: c(
+    person("Adam J.", "Eichenwald", email = "adam.eichenwald@maine.edu", role = c("aut", "cre")),
+    person("John M.", "Grady", role = "aut"),
+    person("Alyson", "East", role = "aut"),
+    person("Noah", "Charney", role = "aut"),
+    person("Sydne", "Record", role = "aut")
+)
 Description: Estimate forest size-abundance distribution from remote sensing image.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: `use_mit_license()`
 Encoding: UTF-8
 VignetteBuilder: knitr
 Suggests: 
