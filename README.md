@@ -8,9 +8,6 @@ The R package for interpolating understory trees from remote sensing images
 
 <!-- badges: start -->
 
-<<<<<<< HEAD
-&nbsp; \[!\[R-CMD-check](https://github.com/ForestScaling/ScalingFromSkypackage/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ForestScaling/ScalingFromSkypackage/actions/workflows/R-CMD-check.yaml)
-=======
 \[!\[R-CMD-check](https://github.com/ForestScaling/ScalingFromSkypackage/.github/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ForestScaling/ScalingFromSkypackage/.github/workflows/R-CMD-check.yaml)
 >>>>>>> 95d20babc0c159579a85d710fd3b6a66a0a9147a
 
