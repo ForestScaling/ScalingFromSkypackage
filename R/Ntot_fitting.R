@@ -1,3 +1,5 @@
+#' @importFrom dplyr %>%
+
 #' Stan model string for estimating Ntotal with LAI and breakpoint corrections
 #'
 #' This is the default Stan model used by [fit_ntot_model()]. You can modify it by replacing the `stan_model_code` argument.

@@ -1,7 +1,7 @@
 
 # Declare global variables to satisfy R CMD check
 utils::globalVariables(c("dbh", "log_x", "x", "trunc_output", "variable"))
-
+#' @importFrom dplyr %>%
 
 #' Stan model string for estimating alpha with LAI and breakpoint corrections
 #'
@@ -124,7 +124,7 @@ potential_break <- function(data,
 
   # Calculate the candidate breakpoint
   potential_breakpoint <- peak_df %>%
-    dplyr::filter(log_x <= quantile(log10(size_vector_trimmed), 0.75)) %>%
+    dplyr::filter(log_x <= stats::quantile(log10(size_vector_trimmed), 0.75)) %>%
     dplyr::filter(log_x == max(log_x)) %>%
     dplyr::pull(log_x)
 
@@ -196,8 +196,8 @@ truncate_filter <- function(breakpoint_kde_results, min_size = 10) {
 
   # Create segment data frame
   segments_df <- data.frame(
-    left_x = head(segment_boundaries, -1),     # Left boundary of each segment
-    right_x = tail(segment_boundaries, -1),   # Right boundary of each segment
+    left_x = utils::head(segment_boundaries, -1),     # Left boundary of each segment
+    right_x = utils::tail(segment_boundaries, -1),   # Right boundary of each segment
     slope = slopes                    # Slope of each segment
   )
 
