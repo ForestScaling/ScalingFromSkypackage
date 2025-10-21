@@ -7,7 +7,7 @@ Authors@R: c(
     person("Alyson", "East", role = "aut"),
     person("Noah", "Charney", role = "aut"),
     person("Sydne", "Record", role = "aut"))
-Description: Estimate forest size-abundance distribution from remote sensing image.
+Description: Estimate forest size-abundance distribution from remote sensing image
 License: MIT + file LICENSE
 Encoding: UTF-8
 VignetteBuilder: knitr
@@ -22,6 +22,7 @@ Imports:
     performance,
     posterior,
     rstan,
+    tidyr,
     segmented,
     splus2R,
     VGAM,

@@ -2,7 +2,7 @@
 
 #' Stan model string for estimating Ntotal with LAI and breakpoint corrections
 #'
-#' This is the default Stan model used by [fit_ntot_model()]. You can modify it by replacing the `stan_model_code` argument.
+#' This is the default Stan model used by [estimate_total_trees()]. You can modify it by replacing the `stan_model_code` argument.
 #' @format A character string containing the full Stan model code.
 #' @export
 # Define the Stan model
@@ -74,6 +74,7 @@ model {
 #' @param warmup Warmup iterations (default = 6000).
 #' @param iter Total iterations (default = 9000).
 #' @param refresh Refresh rate for Stan (default = 0).
+#' @param num_alpha_samples The total number of samples from the posterior for alpha that you want to include, in case you want to reduce runtime.
 #' @return A list with posterior summary for N_tot and full stan fit object.
 #' @export
 estimate_total_trees <- function(alpha_model_output,
