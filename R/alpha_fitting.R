@@ -49,8 +49,8 @@ model {
 #' \describe{
 #'   \item{potential_breakpoint}{A numeric value representing the estimated lower log10 size bound breakpoint.}
 #'   \item{bootstrap_kde_log}{A data frame with log-scaled KDE values (`log_x`, `mean_log_density`).}
-#'   \item{original_data_trimmed}{The original size vector *after* trimming by `trim_max`. This is crucial for quantile calculation in the first function and for the final filtering in the second.}
-#'   \item{original_raw_data_df}{The original input data frame, untouched, so the second function can filter it.}
+#'   \item{original_data_trimmed}{The original size vector *after* trimming by `trim_max`. This is crucial for quantile calculation in the first function and for the final dplyr::filtering in the second.}
+#'   \item{original_raw_data_df}{The original input data frame, untouched, so the second function can dplyr::filter it.}
 #'   \item{trim_max_value}{The `trim_max` value used in this function, passed along for consistency.}
 #' }
 #' @export
@@ -75,19 +75,19 @@ potential_break <- function(data,
   # KDE smoothing
   kde <- stats::density(size_vector_trimmed, bw = bandwidth)
   kde_df <- data.frame(x = kde$x, y = kde$y)
-  observed_vals <- sort(unique(size_vector_trimmed)) # Used for filtering KDE results
+  observed_vals <- sort(unique(size_vector_trimmed)) # Used for dplyr::filtering KDE results
 
-  # Filter KDE results to observed data range
+  # dplyr::filter KDE results to observed data range
   kde_df <- kde_df %>%
-    dplyr::filter(x >= min(size_vector_trimmed), x <= max(size_vector_trimmed))
+    dplyr::dplyr::filter(x >= min(size_vector_trimmed), x <= max(size_vector_trimmed))
 
-  # Further filter KDE to points near observed values
-  filtered_kde <- kde_df %>%
+  # Further dplyr::filter KDE to points near observed values
+  dplyr::filtered_kde <- kde_df %>%
     dplyr::rowwise() %>%
-    dplyr::filter(any(abs(x - observed_vals) <= 0.5)) %>%
+    dplyr::dplyr::filter(any(abs(x - observed_vals) <= 0.5)) %>%
     dplyr::ungroup()
 
-  x_values <- filtered_kde$x
+  x_values <- dplyr::filtered_kde$x
 
   # Bootstrap KDEs
   bootstrap_kdes <- replicate(
@@ -111,7 +111,7 @@ potential_break <- function(data,
   # Identify local peaks using splus2R::peaks()
   peak_df <- splus2R::peaks(bootstrap_kde_log$mean_log_density) %>%
     cbind(bootstrap_kde_log) %>%
-    dplyr::filter(. == TRUE)
+    dplyr::dplyr::filter(. == TRUE)
 
   if (nrow(peak_df) == 0) {
     stop("No distinct peaks detected in the KDE curve for breakpoint identification.")
@@ -119,13 +119,13 @@ potential_break <- function(data,
 
   # Calculate the candidate breakpoint
   potential_breakpoint <- peak_df %>%
-    dplyr::filter(log_x <= quantile(log10(size_vector_trimmed), 0.75)) %>%
-    dplyr::filter(log_x == max(log_x)) %>%
+    dplyr::dplyr::filter(log_x <= quantile(log10(size_vector_trimmed), 0.75)) %>%
+    dplyr::dplyr::filter(log_x == max(log_x)) %>%
     dplyr::pull(log_x)
 
-  # Handle cases where no breakpoint is found after filtering
+  # Handle cases where no breakpoint is found after dplyr::filtering
   if (length(potential_breakpoint) == 0) {
-    warning("No suitable breakpoint found after filtering peaks. Returning NA for breakpoint.")
+    warning("No suitable breakpoint found after dplyr::filtering peaks. Returning NA for breakpoint.")
     potential_breakpoint <- NA
   }
 
@@ -138,11 +138,11 @@ potential_break <- function(data,
   ))
 }
 
-#' Determine Truncation Points and Filter Data for Power-Law Modeling
+#' Determine Truncation Points and dplyr::filter Data for Power-Law Modeling
 #'
 #' This function takes the potential breakpoint and KDE data from a previous step,
 #' performs segmented regression, determines the upper truncation point,
-#' and filters the original dataset to the identified size range.
+#' and dplyr::filters the original dataset to the identified size range.
 #'
 #' @param breakpoint_kde_results A list returned by `potential_break`.
 #'   It must contain `potential_breakpoint`, `bootstrap_kde_log`,
@@ -155,7 +155,7 @@ potential_break <- function(data,
 #'   \item{kerneldens_logtransform}{The full log-scaled KDE data from the first function.}
 #' }
 #' @export
-truncate_filter <- function(breakpoint_kde_results, min_size = 10) {
+truncate_dplyr::filter <- function(breakpoint_kde_results, min_size = 10) {
 
   # Extract necessary components from the input list
   potential_breakpoint <- breakpoint_kde_results$potential_breakpoint
@@ -168,13 +168,13 @@ truncate_filter <- function(breakpoint_kde_results, min_size = 10) {
     stop("Potential breakpoint is NA. Cannot proceed with segmented regression. Check 'potential_break' output.")
   }
 
-  # Filter the data for segmented regression *before* passing it to lm
+  # dplyr::filter the data for segmented regression *before* passing it to lm
   bootstrap_kde_log_for_lm <- bootstrap_kde_log[bootstrap_kde_log$log_x >= potential_breakpoint, ]
 
 
-  # Ensure there's enough data for lm after filtering
+  # Ensure there's enough data for lm after dplyr::filtering
   if (nrow(bootstrap_kde_log_for_lm) < 2) { # Need at least 2 points for a line for lm
-    stop("Not enough data points after breakpoint filtering for segmented regression.")
+    stop("Not enough data points after breakpoint dplyr::filtering for segmented regression.")
   }
 
   # Segmented regression for upper truncation decision
@@ -198,21 +198,21 @@ truncate_filter <- function(breakpoint_kde_results, min_size = 10) {
 
   if(segments_df[nrow(segments_df),]$slope<=-min_size | segments_df[nrow(segments_df),]$slope>0){
     bayesian_data<-original_data_trimmed_df%>%
-      filter(dbh>=10^potential_breakpoint)%>%
-      filter(dbh>=min_size)%>%
-      filter(dbh<=10^segments_df[nrow(segments_df),]$left_x)
+      dplyr::filter(dbh>=10^potential_breakpoint)%>%
+      dplyr::filter(dbh>=min_size)%>%
+      dplyr::filter(dbh<=10^segments_df[nrow(segments_df),]$left_x)
     bootstrap_kde_log<-bootstrap_kde_log%>%
-      filter(log_x>=potential_breakpoint)%>%
-      filter(log_x>=log10(min_size))%>%
-      filter(log_x<=segments_df[nrow(segments_df),]$left_x)
+      dplyr::filter(log_x>=potential_breakpoint)%>%
+      dplyr::filter(log_x>=log10(min_size))%>%
+      dplyr::filter(log_x<=segments_df[nrow(segments_df),]$left_x)
   }else{
     bayesian_data<-original_data_trimmed_df%>%
-      filter(dbh>=10^potential_breakpoint)%>%
-      filter(dbh>=min_size)
+      dplyr::filter(dbh>=10^potential_breakpoint)%>%
+      dplyr::filter(dbh>=min_size)
 
     bootstrap_kde_log<-bootstrap_kde_log%>%
-      filter(log_x>=potential_breakpoint)%>%
-      filter(log_x>=log10(min_size))
+      dplyr::filter(log_x>=potential_breakpoint)%>%
+      dplyr::filter(log_x>=log10(min_size))
   }
   return(list(
     bayesian_data = bayesian_data,
@@ -228,7 +228,7 @@ truncate_filter <- function(breakpoint_kde_results, min_size = 10) {
 #' this function will require rstan, which itself needs Rtools. Rtools is not a CRAN package and as far
 #' as we know must be installed directly. Try this link (https://cran.r-project.org/bin/windows/Rtools/)
 #'
-#' @param bayesian_data A data frame of filtered tree sizes (from `truncate_filter()`).
+#' @param bayesian_data A data frame of dplyr::filtered tree sizes (from `truncate_dplyr::filter()`).
 #' @param bootstrap_kde_log A data frame of log10(size) and log10(kernel density), used for computing R2.
 #' @param breakpoint The final lower log10 size threshold (from KDE peak).
 #' @param LAI A numeric value for site-level Leaf Area Index. The function assumes your LAI value is on
@@ -298,7 +298,7 @@ fit_alpha_model <- function(bayesian_data,
   )
 
   summary_df <- posterior::summarise_draws(stan_fit) %>%
-    dplyr::filter(variable == "alpha") %>%
+    dplyr::dplyr::filter(variable == "alpha") %>%
     dplyr::mutate(
       R2_kernel = performance::r2(stats::lm(mean_log_density ~ log_x, trunc_output$kerneldens_logtransform))$R2
     )
