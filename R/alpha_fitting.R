@@ -1,7 +1,7 @@
 #' @importFrom dplyr %>%
 NULL
 
-utils::globalVariables(c("dbh", "log_x", "x", "trunc_output", "variable"))
+utils::globalVariables(c("dbh", "log_x", "x", "trunc_output", "variable", "peaks"))
 
 
 #' Stan model string for estimating alpha with LAI and breakpoint corrections
@@ -115,9 +115,11 @@ potential_break <- function(data,
   )
 
   # Identify local peaks using splus2R::peaks()
-  peak_df <- splus2R::peaks(bootstrap_kde_log$mean_log_density) %>%
-    cbind(bootstrap_kde_log) %>%
-    dplyr::filter(. == TRUE)
+  peak_df <- cbind(
+    bootstrap_kde_log,
+    peaks = splus2R::peaks(bootstrap_kde_log$mean_log_density))%>%
+    dplyr::filter(peaks == TRUE)
+
 
   if (nrow(peak_df) == 0) {
     stop("No distinct peaks detected in the KDE curve for breakpoint identification.")

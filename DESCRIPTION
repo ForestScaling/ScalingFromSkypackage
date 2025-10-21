@@ -1,5 +1,5 @@
 Package: ScalingFromSkypackage
-Title: Estimate Forest Size-Abundance Distribution from Remote Sensing Image.
+Title: Estimate Forest Size-Abundance Distribution from Remote Sensing Image
 Version: 1.0
 Authors@R: c(
     person("Adam J.", "Eichenwald", email = "adam.eichenwald@maine.edu", role = c("aut", "cre")),
@@ -7,7 +7,7 @@ Authors@R: c(
     person("Alyson", "East", role = "aut"),
     person("Noah", "Charney", role = "aut"),
     person("Sydne", "Record", role = "aut"))
-Description: Estimate forest size-abundance distribution from remote sensing image
+Description: Estimate forest size-abundance distribution from remote sensing image.
 License: MIT + file LICENSE
 Encoding: UTF-8
 VignetteBuilder: knitr
@@ -15,18 +15,17 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
+Depends: R (>= 2.10)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+LazyData: true
+LazyDataCompression: xz
 Imports: 
     dplyr,
     performance,
     posterior,
     rstan,
     tidyr,
-    tibble,
-    data.table,
     segmented,
-    splus2R,
-    VGAM,
-    ggplot2
+    splus2R
 Config/testthat/edition: 3

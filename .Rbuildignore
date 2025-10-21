@@ -1,2 +1,4 @@
 ^\.github$
 ^tarballs$
+^ScalingFromSkypackage\.Rproj$
+^LICENSE\.md$
