@@ -1,4 +1,4 @@
-test_that("get_potential_breakpoint_and_kde runs and returns correctly structured output", {
+test_that("potential_break runs and returns correctly structured output", {
   set.seed(42)
   # Create test data with a realistic DBH distribution
   test_data <- data.frame(dbh = c(
@@ -7,7 +7,7 @@ test_that("get_potential_breakpoint_and_kde runs and returns correctly structure
   ))
 
   # Run function
-  result <- get_potential_breakpoint_and_kde(
+  result <- potential_break(
     data = test_data,
     n_bootstrap = 50,  # smaller for faster testing
     bandwidth = "SJ",

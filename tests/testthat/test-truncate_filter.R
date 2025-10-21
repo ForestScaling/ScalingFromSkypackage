@@ -1,4 +1,4 @@
-test_that("determine_truncation_and_filter runs with valid input and returns expected structure", {
+test_that("truncate_filter runs with valid input and returns expected structure", {
   set.seed(42)
   # Create synthetic data and run the first function
   test_data <- data.frame(dbh = c(
@@ -14,7 +14,7 @@ test_that("determine_truncation_and_filter runs with valid input and returns exp
   )
 
   # Run the second function
-  truncation_results <- determine_truncation_and_filter(kde_results)
+  truncation_results <- truncate_filter(kde_results)
 
   # Structure and type checks
   expect_type(truncation_results, "list")
@@ -42,7 +42,7 @@ test_that("function stops with NA breakpoint", {
   )
 
   expect_error(
-    determine_truncation_and_filter(fake_kde_results),
+    truncate_filter(fake_kde_results),
     "Potential breakpoint is NA"
   )
 })
@@ -59,7 +59,7 @@ test_that("function stops with insufficient data after filtering", {
   )
 
   expect_error(
-    determine_truncation_and_filter(fake_kde_results),
+    truncate_filter(fake_kde_results),
     "Not enough data points after breakpoint filtering"
   )
 })
@@ -75,7 +75,7 @@ test_that("filtered data are within size limits and above min_size", {
     trim_max = 50
   )
 
-  truncation_results <- determine_truncation_and_filter(kde_results, min_size = 15)
+  truncation_results <- truncate_filter(kde_results, min_size = 15)
 
   expect_true(all(truncation_results$bayesian_data$dbh >= 15))
   expect_true(all(truncation_results$kerneldens_logtransform$log_x >= log10(15)))
