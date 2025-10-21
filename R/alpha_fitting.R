@@ -155,7 +155,7 @@ potential_break <- function(data,
 #'   \item{kerneldens_logtransform}{The full log-scaled KDE data from the first function.}
 #' }
 #' @export
-truncate_dplyr::filter <- function(breakpoint_kde_results, min_size = 10) {
+truncate_filter <- function(breakpoint_kde_results, min_size = 10) {
 
   # Extract necessary components from the input list
   potential_breakpoint <- breakpoint_kde_results$potential_breakpoint
@@ -228,7 +228,7 @@ truncate_dplyr::filter <- function(breakpoint_kde_results, min_size = 10) {
 #' this function will require rstan, which itself needs Rtools. Rtools is not a CRAN package and as far
 #' as we know must be installed directly. Try this link (https://cran.r-project.org/bin/windows/Rtools/)
 #'
-#' @param bayesian_data A data frame of dplyr::filtered tree sizes (from `truncate_dplyr::filter()`).
+#' @param bayesian_data A data frame of dplyr::filtered tree sizes (from `truncate_filter()`).
 #' @param bootstrap_kde_log A data frame of log10(size) and log10(kernel density), used for computing R2.
 #' @param breakpoint The final lower log10 size threshold (from KDE peak).
 #' @param LAI A numeric value for site-level Leaf Area Index. The function assumes your LAI value is on
