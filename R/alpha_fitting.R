@@ -79,12 +79,12 @@ potential_break <- function(data,
 
   # dplyr::filter KDE results to observed data range
   kde_df <- kde_df %>%
-    dplyr::dplyr::filter(x >= min(size_vector_trimmed), x <= max(size_vector_trimmed))
+    dplyr::filter(x >= min(size_vector_trimmed), x <= max(size_vector_trimmed))
 
   # Further dplyr::filter KDE to points near observed values
   dplyr::filtered_kde <- kde_df %>%
     dplyr::rowwise() %>%
-    dplyr::dplyr::filter(any(abs(x - observed_vals) <= 0.5)) %>%
+    dplyr::filter(any(abs(x - observed_vals) <= 0.5)) %>%
     dplyr::ungroup()
 
   x_values <- dplyr::filtered_kde$x
@@ -111,7 +111,7 @@ potential_break <- function(data,
   # Identify local peaks using splus2R::peaks()
   peak_df <- splus2R::peaks(bootstrap_kde_log$mean_log_density) %>%
     cbind(bootstrap_kde_log) %>%
-    dplyr::dplyr::filter(. == TRUE)
+    dplyr::filter(. == TRUE)
 
   if (nrow(peak_df) == 0) {
     stop("No distinct peaks detected in the KDE curve for breakpoint identification.")
@@ -119,8 +119,8 @@ potential_break <- function(data,
 
   # Calculate the candidate breakpoint
   potential_breakpoint <- peak_df %>%
-    dplyr::dplyr::filter(log_x <= quantile(log10(size_vector_trimmed), 0.75)) %>%
-    dplyr::dplyr::filter(log_x == max(log_x)) %>%
+    dplyr::filter(log_x <= quantile(log10(size_vector_trimmed), 0.75)) %>%
+    dplyr::filter(log_x == max(log_x)) %>%
     dplyr::pull(log_x)
 
   # Handle cases where no breakpoint is found after dplyr::filtering
@@ -298,7 +298,7 @@ fit_alpha_model <- function(bayesian_data,
   )
 
   summary_df <- posterior::summarise_draws(stan_fit) %>%
-    dplyr::dplyr::filter(variable == "alpha") %>%
+    dplyr::filter(variable == "alpha") %>%
     dplyr::mutate(
       R2_kernel = performance::r2(stats::lm(mean_log_density ~ log_x, trunc_output$kerneldens_logtransform))$R2
     )
