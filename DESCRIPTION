@@ -23,6 +23,8 @@ Imports:
     posterior,
     rstan,
     tidyr,
+    tibble,
+    data.table,
     segmented,
     splus2R,
     VGAM,

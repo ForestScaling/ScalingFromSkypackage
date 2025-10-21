@@ -39,12 +39,12 @@ This vignette demonstrates a complete workflow using sample data from the Harvar
 We begin by loading the necessary libraries, including `ScalingFromSkypackage`, and our sample dataset.
 
 ```{r message=FALSE, warning=FALSE}
-library(sf)
+# library(sf)
 library(dplyr)
 library(ggplot2) # Added for plotting
-library(purrr)
-library(itcSegment)
-library(stringr)
+# library(purrr)
+# library(itcSegment)
+# library(stringr)
 library(tibble)
 library(VGAM)
 library(data.table)
