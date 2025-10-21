@@ -6,7 +6,7 @@ test_that("truncate_filter runs with valid input and returns expected structure"
     rlnorm(500, meanlog = log(35), sdlog = 0.2)
   ))
 
-  kde_results <- get_potential_breakpoint_and_kde(
+  kde_results <- potential_break(
     data = test_data,
     n_bootstrap = 50,
     bandwidth = "SJ",
@@ -68,7 +68,7 @@ test_that("filtered data are within size limits and above min_size", {
   set.seed(123)
   test_data <- data.frame(dbh = rlnorm(300, meanlog = log(20), sdlog = 0.25))
 
-  kde_results <- get_potential_breakpoint_and_kde(
+  kde_results <- potential_break(
     data = test_data,
     n_bootstrap = 30,
     bandwidth = "SJ",
