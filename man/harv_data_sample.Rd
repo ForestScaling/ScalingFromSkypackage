@@ -26,9 +26,6 @@ Harvard Forest CTFS-ForestGEO Mapped Forest Plot (HF253):
 \url{https://harvardforest1.fas.harvard.edu/exist/apps/datasets/showData.html?id=hf253}
 NEON Airborne Observation Platform (AOP): \url{https://www.neonscience.org/data-collection/airborne-remote-sensing}
 }
-\usage{
-harv_data_sample
-}
 \description{
 A sample dataset derived from the Harvard Forest CTFS-ForestGEO Mapped Forest Plot
 (HF253) and supplemented with canopy height measurements from the NEON Airborne
@@ -60,13 +57,10 @@ dataset and should not be used as a replacement for the full CTFS-ForestGEO plot
 }
 \examples{
 data(harv_data_sample)
-# Quick look
 head(harv_data_sample)
 
-# Relationship between canopy height and estimated DBH
 plot(harv_data_sample$Max_Height, harv_data_sample$dbh,
      xlab = "Canopy Height (m)", ylab = "DBH (cm)",
      main = "Height vs DBH in Harvard Forest sample")
 
 }
-\keyword{datasets}

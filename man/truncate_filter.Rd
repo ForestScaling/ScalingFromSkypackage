@@ -10,6 +10,10 @@ truncate_filter(breakpoint_kde_results, min_size = 10)
 \item{breakpoint_kde_results}{A list returned by \code{potential_break}.
 It must contain \code{potential_breakpoint}, \code{bootstrap_kde_log},
 \code{original_raw_data_df}, and \code{trim_max_value}.}
+
+\item{min_size}{The mimimum tree DBH that will be in the final distribution. This is the lower bound to
+the Pareto distribution, not the breakpoint for obscured vs unobscured trees. As such, this is usually approx
+10 cm.}
 }
 \value{
 A list with:

@@ -1,3 +1,9 @@
+#' @importFrom dplyr %>%
+NULL
+
+utils::globalVariables(c("dbh", "log_x", "x", "trunc_output", "variable"))
+
+
 #' Stan model string for estimating Ntotal with LAI and breakpoint corrections
 #'
 #' This is the default Stan model used by [estimate_total_trees()]. You can modify it by replacing the `stan_model_code` argument.

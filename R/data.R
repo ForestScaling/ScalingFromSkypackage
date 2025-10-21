@@ -35,7 +35,7 @@
 #' Diameter at breast height (\code{dbh}) was estimated from canopy height and canopy
 #' diameter using the allometric equation implemented in \pkg{itcSegment}:
 #' \deqn{dbh = itcSegment::dbh(H = Max\_Height, CA = Diameter)}
-#' 
+#'
 #' IDhectbest is not in the original ForestGEO data, and is instead the result of a
 #' fishnet shapefile with 1 hectare squares overlaid on top of the original plot.
 #' The original plot is much larger than 1 hectare.
@@ -51,12 +51,12 @@
 #'
 #' @examples
 #' data(harv_data_sample)
-#' # Quick look
 #' head(harv_data_sample)
 #'
-#' # Relationship between canopy height and estimated DBH
 #' plot(harv_data_sample$Max_Height, harv_data_sample$dbh,
 #'      xlab = "Canopy Height (m)", ylab = "DBH (cm)",
 #'      main = "Height vs DBH in Harvard Forest sample")
 #'
-"harv_data_sample"
+#' @docType data
+#' @name harv_data_sample
+NULL

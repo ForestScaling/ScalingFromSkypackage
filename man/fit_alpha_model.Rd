@@ -14,7 +14,8 @@ fit_alpha_model(
   iter = 9000,
   warmup = 6000,
   chains = 4,
-  cores = 1
+  cores = 1,
+  refresh = 0
 )
 }
 \arguments{
@@ -40,8 +41,6 @@ the LAI to be between 0 and 1}
 \item{chains}{Number of chains (default = 4).}
 
 \item{cores}{Number of CPU cores to use (default = 1).}
-
-\item{bootstrap_kde_log}{A data frame of log10(size) and log10(kernel density), used for computing R2.}
 
 \item{refresh}{Frequency of Stan progress output (default = 0).}
 }

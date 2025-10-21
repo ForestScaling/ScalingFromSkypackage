@@ -1,3 +1,9 @@
+#' @importFrom dplyr %>%
+NULL
+
+utils::globalVariables(c("dbh", "log_x", "x", "trunc_output", "variable"))
+
+
 #' Stan model string for estimating alpha with LAI and breakpoint corrections
 #'
 #' This is the default Stan model used by [fit_alpha_model()]. You can modify it by replacing the `stan_model_code` argument.
@@ -147,6 +153,9 @@ potential_break <- function(data,
 #' @param breakpoint_kde_results A list returned by `potential_break`.
 #'   It must contain `potential_breakpoint`, `bootstrap_kde_log`,
 #'   `original_raw_data_df`, and `trim_max_value`.
+#' @param min_size The mimimum tree DBH that will be in the final distribution. This is the lower bound to
+#' the Pareto distribution, not the breakpoint for obscured vs unobscured trees. As such, this is usually approx
+#' 10 cm.
 #'
 #' @return A list with:
 #' \describe{
@@ -229,7 +238,6 @@ truncate_filter <- function(breakpoint_kde_results, min_size = 10) {
 #' as we know must be installed directly. Try this link (https://cran.r-project.org/bin/windows/Rtools/)
 #'
 #' @param bayesian_data A data frame of filtered tree sizes (from `truncate_filter()`).
-#' @param bootstrap_kde_log A data frame of log10(size) and log10(kernel density), used for computing R2.
 #' @param breakpoint The final lower log10 size threshold (from KDE peak).
 #' @param LAI A numeric value for site-level Leaf Area Index. The function assumes your LAI value is on
 #' a 1-10 scale and will divide by 10 to get LAI between 0 and 1 (e.g., if you have an LAI of 5 on a scale of 1-10,
@@ -259,7 +267,8 @@ fit_alpha_model <- function(bayesian_data,
                             iter = 9000,
                             warmup = 6000,
                             chains = 4,
-                            cores = 1) {
+                            cores = 1,
+                            refresh = 0) {
 
   stopifnot(is.data.frame(bayesian_data),
             "dbh" %in% names(bayesian_data),
