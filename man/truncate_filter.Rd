@@ -2,7 +2,7 @@
 % Please edit documentation in R/alpha_fitting.R
 \name{truncate_filter}
 \alias{truncate_filter}
-\title{Determine Truncation Points and Filter Data for Power-Law Modeling}
+\title{Determine Truncation Points and filter Data for Power-Law Modeling}
 \usage{
 truncate_filter(breakpoint_kde_results, min_size = 10)
 }

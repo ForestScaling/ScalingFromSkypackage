@@ -38,6 +38,8 @@ estimate_total_trees(
 \item{iter}{Total iterations (default = 9000).}
 
 \item{refresh}{Refresh rate for Stan (default = 0).}
+
+\item{num_alpha_samples}{The total number of samples from the posterior for alpha that you want to include, in case you want to reduce runtime.}
 }
 \value{
 A list with posterior summary for N_tot and full stan fit object.

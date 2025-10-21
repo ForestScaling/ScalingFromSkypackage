@@ -1,8 +1,3 @@
-
-# Declare global variables to satisfy R CMD check
-utils::globalVariables(c("dbh", "log_x", "x", "trunc_output", "variable"))
-#' @importFrom dplyr %>%
-
 #' Stan model string for estimating alpha with LAI and breakpoint corrections
 #'
 #' This is the default Stan model used by [fit_alpha_model()]. You can modify it by replacing the `stan_model_code` argument.
