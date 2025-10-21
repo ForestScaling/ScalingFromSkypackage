@@ -6,8 +6,7 @@ Authors@R: c(
     person("John M.", "Grady", role = "aut"),
     person("Alyson", "East", role = "aut"),
     person("Noah", "Charney", role = "aut"),
-    person("Sydne", "Record", role = "aut")
-)
+    person("Sydne", "Record", role = "aut"))
 Description: Estimate forest size-abundance distribution from remote sensing image.
 License: `use_mit_license()`
 Encoding: UTF-8
