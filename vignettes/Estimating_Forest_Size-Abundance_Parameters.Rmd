@@ -171,7 +171,7 @@ fit <- fit_alpha_model(
 )
 ```
 
-Let's create a plot showing the resulting fitted curve.
+Let's create a plot showing the resulting fitted curve:
 
 ```{r fig.height=4, fig.width=6, message=FALSE, warning=FALSE eval = FALSE}
 # Create a data frame for plotting the fitted line
