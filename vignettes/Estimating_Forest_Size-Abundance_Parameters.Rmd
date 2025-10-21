@@ -38,7 +38,7 @@ This vignette demonstrates a complete workflow using sample data from the Harvar
 
 We begin by loading the necessary libraries, including `ScalingFromSkypackage`, and our sample dataset.
 
-```{r message=FALSE, warning=FALSE eval = FALSE}
+```{r message=FALSE, warning=FALSE, eval = FALSE}
 library(sf)
 library(dplyr)
 library(ggplot2) # Added for plotting
@@ -115,7 +115,7 @@ kde_output <- potential_break(df_tile)
 
 We can inspect the output to see the estimated breakpoint.
 
-```{r results='asis' eval = FALSE}
+```{r results='asis', eval = FALSE}
 # The result of this function is a list containing the breakpoint and KDE data.
 # We'll print a summary of the key output.
 cat("### Estimated Breakpoint\n")
@@ -161,7 +161,7 @@ The function returns a **list** with:
 - `stan_fit`: The **full Stan fit object**, which can be inspected or used for further posterior analyses.
 
 
-```{r message=FALSE, warning=FALSE eval = FALSE}
+```{r message=FALSE, warning=FALSE, eval = FALSE}
 fit <- fit_alpha_model(
   bayesian_data = trunc_output$bayesian_data,
   breakpoint = trunc_output$final_breakpoint,
@@ -173,7 +173,7 @@ fit <- fit_alpha_model(
 
 Let's create a plot showing the resulting fitted curve:
 
-```{r fig.height=4, fig.width=6, message=FALSE, warning=FALSE eval = FALSE}
+```{r fig.height=4, fig.width=6, message=FALSE, warning=FALSE, eval = FALSE}
 # Create a data frame for plotting the fitted line
 plot_data <- tibble(
   dbh = seq(10, 50, length.out = 100),
@@ -210,7 +210,7 @@ acre, TPA) for the U.S. using a random forest machine-learning approach (Riley e
 
 Visualize the results, where the y-axis density from our previous graph is converted to tree abundance.
 
-```{r fig.height=4, fig.width=6, message=FALSE, warning=FALSE eval = FALSE}
+```{r fig.height=4, fig.width=6, message=FALSE, warning=FALSE, eval = FALSE}
 # Create a data frame for plotting the fitted line
 plot_data <- tibble(
   dbh = seq(10, 50, length.out = 100),
