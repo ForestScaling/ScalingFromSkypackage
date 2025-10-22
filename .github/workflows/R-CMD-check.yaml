@@ -40,12 +40,20 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
+      #  Install R dependencies including rstan + BH for vignette compilation
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: |
+            any::rcmdcheck
+            any::rstan
+            any::BH
+            any::ggplot2
+            any::VGAM
+            any::purrr
           needs: check
 
+      #  Run R CMD check (builds and runs vignettes)
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
-          args: '--no-manual --ignore-vignettes'
+          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
