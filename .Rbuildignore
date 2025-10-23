@@ -7,3 +7,4 @@
 ^vignettes/.Rhistory$
 ^vignettes/.RData$
 ^vignettes/.Rproj$
+^\.Rproj\.user$

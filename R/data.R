@@ -3,7 +3,7 @@
 #' A sample dataset derived from the Harvard Forest CTFS-ForestGEO Mapped Forest Plot
 #' (HF253) and supplemented with canopy height measurements from the NEON Airborne
 #' Observation Platform (AOP). This dataset provides tree-level information used in
-#' the \pkg{ScalingFromSky} package for examples and testing.
+#' the \pkg{ScalingFromSkypackage} for examples and testing.
 #'
 #' The dataset contains a subset of the full Harvard Forest plot (see Source), including
 #' bounding box coordinates, canopy structural attributes, and derived estimates of

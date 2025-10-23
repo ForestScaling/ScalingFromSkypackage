@@ -63,7 +63,9 @@ df_tile <- harv_data_sample %>%
   select(dbh)
 ```
 
-The DBHs in this data frame should be estimated allometrically. One possible approach is demonstrated below (shapefile not included, just an example). Users can obtain crown segmentation data from Weinstein et al. (2024), available through Zenodo at https://doi.org/10.5281/zenodo.10926344. The dataset includes delineated tree crowns and associated tree height estimates, making it suitable for calculating allometrically derived DBH values. The workflow for generating these crown shapefiles is well documented in Weinstein et al. (2024) and is based on the methods originally developed in Weinstein et al. (2020). Together, these resources provide a reproducible foundation for linking remote sensing crown data to tree structural attributes such as DBH.
+The DBHs in this data frame should be estimated allometrically. One possible approach is demonstrated below. Users can obtain crown segmentation data from Weinstein et al. (2024), available through Zenodo at https://doi.org/10.5281/zenodo.10926344, or from Weinstein et al., (2022), available through Zenodo at https://doi.org/10.5281/zenodo.3459802. The dataset includes delineated tree crowns and associated tree height estimates, making it suitable for calculating allometrically derived DBH values. The workflow for generating these crown shapefiles is well documented in Weinstein et al. (2024) and is based on the methods originally developed in Weinstein et al. (2020). Together, these resources provide a reproducible foundation for linking remote sensing crown data to tree structural attributes such as DBH.
+
+Users can practice on the sample shapefile 'harvardshapefile' included in this package. The shapefile is from Weinstein et al. (2022).
 
 ```{r eval = FALSE}
 
@@ -376,6 +378,8 @@ Riley, K. L., I. C. Grenfell, M. A. Finney, and J. M. Wiener. 2021. “TreeMap, 
 Weinstein, B. G., Marconi, S., Aubry‐Kientz, M., Vincent, G., Senyondo, H., & White, E. P. (2020). DeepForest: A Python package for RGB deep learning tree crown delineation. Methods in Ecology and Evolution, 11(12), 1743–1751. https://doi.org/10.1111/2041-210X.13472 
 
 Weinstein, B. G., Marconi, S., Bohlman, S. A., Zare, A., Singh, A., Graves, S. J., & White, E. P. (2021). A remote sensing derived data set of 100 million individual tree crowns for the National Ecological Observatory Network. eLife, 10, e62922. https://doi.org/10.7554/eLife.62922 
+
+Ben Weinstein, Sergio Marconi, & Ethan White. (2022). Data for the NeonTreeEvaluation Benchmark (0.2.2) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.5914554
 
 Weinstein, B. G., Marconi, S., Zare, A., Bohlman, S. A., Singh, A., Graves, S. J., Magee, L., Johnson, D. J., Record, S., Rubio, V. E., Swenson, N. G., Townsend, P. A., Veblen, T. T., Andrus, R. A., & White, E. P. (2024). Individual tree species maps for the National Ecological Observatory Network. PLoS Biology, 22(7). https://doi.org/10.1371/journal.pbio.3002700 
 
