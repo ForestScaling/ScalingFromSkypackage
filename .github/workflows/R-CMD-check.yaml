@@ -49,6 +49,7 @@ jobs:
             any::StanHeaders
             any::BH
             any::RcppEigen
+            any::sf
             any::ggplot2
             any::VGAM
             any::purrr
