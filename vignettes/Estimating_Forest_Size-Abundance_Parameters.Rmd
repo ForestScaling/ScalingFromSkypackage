@@ -54,15 +54,6 @@ data("harv_data_sample")
 
 ## Step 1: Prepare Tree Data
 
-Here, we load our pre-processed tree data, harv_data_sample, which contains attributes such as IDhectbest (a unique identifier for each hectare plot) and dbh (diameter at breast height). These DBH values were derived from crown segmentation and allometric conversion workflows similar to those described in Weinstein et al. (2020, 2021).
-
-```{r}
-# Filter for a specific plot for a single-site example and extract the distribution of individual tree diameters
-df_tile <- harv_data_sample %>%
-  filter(IDhectbest == 1, !is.na(dbh)) %>%
-  select(dbh)
-```
-
 
 ScalingFromSkypackage does not perform crown segmentation or DBH estimation itself; instead, these data are typically generated in earlier steps using other tools. For example, crown polygons can be segmented from LiDAR point clouds or high-resolution RGB imagery using packages such as lidR in R (Roussel et al., 2020) or DeepForest in Python (Weinstein et al., 2020), respectively. Geospatial packages such as sf in R can then import and analyze crown shapefiles, while allometric functions in itcSegment can be used to convert crown dimensions (e.g., height, area, perimeter) into DBH. In addition, site-level Leaf Area Index (LAI) is required to adjust estimates for potential segmentation errors. LAI can be obtained from field measurements or from remote-sensing products such as MODIS LAI  or GEDI Plant Area Index (PAI).
 
@@ -95,6 +86,17 @@ harvardshapefile <- harvardshapefile %>%
 
 
 ```
+
+
+Once we have estimates of DBH for each segmented tree, we can begin the process of working with ScalingFromSkypackage. Here we load our pre-processed tree data, harv_data_sample, which contains attributes such as IDhectbest (a unique identifier for each hectare plot) and dbh (diameter at breast height). These DBH values were derived from crown segmentation and allometric conversion workflows similar to those described in Weinstein et al. (2020, 2021).
+
+```{r}
+# Filter for a specific plot for a single-site example and extract the distribution of individual tree diameters
+df_tile <- harv_data_sample %>%
+  filter(IDhectbest == 1, !is.na(dbh)) %>%
+  select(dbh)
+```
+
 ## Step 2: Determine Observation Window
 
 The size-abundance distribution of trees often follows a power-law, but for data from remote sensing part of this distribution is hidden due to smaller trees being overshadowed by larger trees in the canopy. We use a kernel density estimation (KDE) and bootstrapping approach to identify the potential breakpoint at which the observable data deviates from the predicted distribution; trees smaller than this breakpoint are estimated to be obscured by the canopy. The `potential_break` function helps us to determine the point ($x_{min}$) where the observation window (where trees are expected to not be obscured) begins.
