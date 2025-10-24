@@ -20,7 +20,8 @@ The package implements methods for estimating the Pareto α parameter, which cha
 
 ## Included Data
 
-- **`harv_data_sample`**: A curated sample dataset derived from the Harvard Forest CTFS-ForestGEO plot (HF253) and NEON Airborne Observation Platform (AOP). This dataset includes tree crown coordinates, canopy structural attributes, derived DBH estimates, and metadata. It is intended for demonstration, testing, and educational purposes.  
+- **`harv_data_sample`**: A curated sample dataset derived from the Harvard Forest CTFS-ForestGEO plot (HF253) and NEON Airborne Observation Platform (AOP). This dataset includes tree crown coordinates, canopy structural attributes, derived DBH estimates, and metadata. It is intended for demonstration, testing, and educational purposes.
+- harvardshapefile: A sample shapefile of delineated tree crowns covering a larger area of the Harvard Forest ForestGEO site. The polygons are UTM-referenced and include attributes such as crown perimeter, area, and maximum canopy height (Max_Height). This dataset can be used to practice zonal extraction of canopy metrics, allometric DBH estimation, and spatial analysis workflows. The shapefile is included for demonstration and instructional purposes and does not replace the full ForestGEO dataset.
 
 ## Purpose
 
