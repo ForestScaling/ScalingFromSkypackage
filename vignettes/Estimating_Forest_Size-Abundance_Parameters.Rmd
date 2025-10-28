@@ -74,13 +74,14 @@ harvardshapefile$perimeter <- as.numeric(st_perimeter(harvardshapefile))
 harvardshapefile$area <- as.numeric(st_area(harvardshapefile))
 
 # Estimate crown diameter from perimeter and area
-harvardshapefile <- harvardshapefile %>%
+harv_data_sample <- harvardshapefile %>%
   mutate(
     Diameter = 0.5 * sqrt(perimeter^2 - (8 * area)),
     # Calculate DBH using formula from Jucker et al. (2017)
     # Be sure to set `biome` to your forest type (default is global, which is indicated by the integer 0, but the equation can change depending on your forest location. See dbh help file for integer numbers and which biome they indicate)
     dbh = dbh(H = height, CA = Diameter, biome = 0) 
-  )
+  )%>%
+  data.frame()
 
 # `dbh` now contains estimated diameters at breast height for each tree
 
